@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Devis</title>
+  <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #333;
+      padding: 40px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .company-info {
+      width: 50%;
+    }
+
+    .company-info img {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .company-details {
+      margin-bottom: 20px;
+    }
+
+    .document-info {
+      width: 40%;
+      text-align: right;
+    }
+
+    .document-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4F46E5;
+      margin-bottom: 10px;
+    }
+
+    .document-number {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* Client Info */
+    .client-info {
+      margin-bottom: 40px;
+    }
+
+    .client-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f8fafc;
+      font-weight: bold;
+    }
+
+    .amount-column {
+      text-align: right;
+    }
+
+    /* Totals */
+    .totals {
+      width: 40%;
+      margin-left: auto;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .total-row.final {
+      font-weight: bold;
+      font-size: 14px;
+      border-bottom: 2px solid #4F46E5;
+      color: #4F46E5;
+    }
+
+    /* Validity */
+    .validity {
+      margin: 40px 0;
+      padding: 20px;
+      background-color: #f8fafc;
+      border-radius: 4px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 10px;
+      color: #666;
+    }
+
+    .legal-notice {
+      margin-bottom: 10px;
+    }
+
+    .company-footer {
+      margin-top: 20px;
+    }
+
+    /* Signature Block */
+    .signature {
+      margin-top: 40px;
+    }
+
+    .signature-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .signature-block {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin-top: 10px;
+      height: 150px;
+    }
+
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="company-info">
+      <img src="{{company_logo}}" alt="Logo">
+      <div class="company-details">
+        <strong>{{company_name}}</strong><br>
+        {{company_address}}<br>
+        {{company_postal_code}} {{company_city}}<br>
+        Tél : {{company_phone}}<br>
+        Email : {{company_email}}
+      </div>
+      <div>
+        SIRET : {{company_siret}}<br>
+        TVA : {{company_vat}}
+      </div>
+    </div>
+    <div class="document-info">
+      <div class="document-title">DEVIS</div>
+      <div class="document-number">N° {{quote_number}}</div>
+      <div>Date : {{quote_date}}</div>
+      <div>Validité : {{validity_date}}</div>
+    </div>
+  </div>
+
+  <div class="client-info">
+    <div class="client-title">ADRESSÉ À</div>
+    <div>
+      <strong>{{client_name}}</strong><br>
+      {{client_address}}<br>
+      {{client_postal_code}} {{client_city}}<br>
+      {{#if client_vat}}TVA : {{client_vat}}{{/if}}
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th class="amount-column">Quantité</th>
+        <th class="amount-column">Prix unitaire</th>
+        <th class="amount-column">Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each lines}}
+      <tr>
+        <td>{{description}}</td>
+        <td class="amount-column">{{quantity}}</td>
+        <td class="amount-column">{{unit_price}} €</td>
+        <td class="amount-column">{{total}} €</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div class="total-row">
+      <span>Total HT</span>
+      <span>{{total_excl_tax}} €</span>
+    </div>
+    <div class="total-row">
+      <span>TVA ({{vat_rate}}%)</span>
+      <span>{{vat_amount}} €</span>
+    </div>
+    <div class="total-row final">
+      <span>Total TTC</span>
+      <span>{{total_incl_tax}} €</span>
+    </div>
+  </div>
+
+  <div class="validity">
+    <strong>Validité du devis :</strong> Ce devis est valable {{validity_duration}} jours à compter de sa date d'émission.<br>
+    <strong>Modalités de paiement :</strong> {{payment_terms}}
+  </div>
+
+  <div class="signature">
+    <div class="signature-title">BON POUR ACCORD</div>
+    <div>
+      Date :<br>
+      Nom et qualité du signataire :<br>
+      Signature et cachet :
+    </div>
+    <div class="signature-block"></div>
+  </div>
+
+  <div class="footer">
+    <div class="legal-notice">
+      La signature de ce devis implique l'acceptation totale de nos conditions générales de vente.
+    </div>
+    <div class="company-footer">
+      {{company_name}} - SIRET : {{company_siret}} - TVA : {{company_vat}}<br>
+      {{company_legal_form}} au capital de {{company_capital}} € - RCS {{company_rcs}}
+    </div>
+  </div>
+</body>
+</html>

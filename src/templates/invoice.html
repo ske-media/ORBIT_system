@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Facture</title>
+  <style>
+    /* Reset CSS */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #333;
+      padding: 40px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .company-info {
+      width: 50%;
+    }
+
+    .company-info img {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .company-details {
+      margin-bottom: 20px;
+    }
+
+    .document-info {
+      width: 40%;
+      text-align: right;
+    }
+
+    .document-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4F46E5;
+      margin-bottom: 10px;
+    }
+
+    .document-number {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* Client Info */
+    .client-info {
+      margin-bottom: 40px;
+    }
+
+    .client-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f8fafc;
+      font-weight: bold;
+    }
+
+    .amount-column {
+      text-align: right;
+    }
+
+    /* Totals */
+    .totals {
+      width: 40%;
+      margin-left: auto;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .total-row.final {
+      font-weight: bold;
+      font-size: 14px;
+      border-bottom: 2px solid #4F46E5;
+      color: #4F46E5;
+    }
+
+    /* Payments */
+    .payments {
+      margin-bottom: 40px;
+    }
+
+    .payment-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 10px;
+      color: #666;
+    }
+
+    .legal-notice {
+      margin-bottom: 10px;
+    }
+
+    .company-footer {
+      margin-top: 20px;
+    }
+
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="company-info">
+      <img src="{{company_logo}}" alt="Logo">
+      <div class="company-details">
+        <strong>{{company_name}}</strong><br>
+        {{company_address}}<br>
+        {{company_postal_code}} {{company_city}}<br>
+        Tél : {{company_phone}}<br>
+        Email : {{company_email}}
+      </div>
+      <div>
+        SIRET : {{company_siret}}<br>
+        TVA : {{company_vat}}
+      </div>
+    </div>
+    <div class="document-info">
+      <div class="document-title">FACTURE</div>
+      <div class="document-number">N° {{invoice_number}}</div>
+      <div>Date : {{invoice_date}}</div>
+      <div>Échéance : {{due_date}}</div>
+    </div>
+  </div>
+
+  <div class="client-info">
+    <div class="client-title">FACTURER À</div>
+    <div>
+      <strong>{{client_name}}</strong><br>
+      {{client_address}}<br>
+      {{client_postal_code}} {{client_city}}<br>
+      {{#if client_vat}}TVA : {{client_vat}}{{/if}}
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th class="amount-column">Quantité</th>
+        <th class="amount-column">Prix unitaire</th>
+        <th class="amount-column">Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each lines}}
+      <tr>
+        <td>{{description}}</td>
+        <td class="amount-column">{{quantity}}</td>
+        <td class="amount-column">{{unit_price}} €</td>
+        <td class="amount-column">{{total}} €</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div class="total-row">
+      <span>Total HT</span>
+      <span>{{total_excl_tax}} €</span>
+    </div>
+    <div class="total-row">
+      <span>TVA ({{vat_rate}}%)</span>
+      <span>{{vat_amount}} €</span>
+    </div>
+    <div class="total-row final">
+      <span>Total TTC</span>
+      <span>{{total_incl_tax}} €</span>
+    </div>
+  </div>
+
+  {{#if payments.length}}
+  <div class="payments">
+    <div class="payment-title">PAIEMENTS</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Mode de paiement</th>
+          <th class="amount-column">Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each payments}}
+        <tr>
+          <td>{{date}}</td>
+          <td>{{method}}</td>
+          <td class="amount-column">{{amount}} €</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    <div class="totals">
+      <div class="total-row">
+        <span>Total payé</span>
+        <span>{{total_paid}} €</span>
+      </div>
+      <div class="total-row final">
+        <span>Reste à payer</span>
+        <span>{{remaining_amount}} €</span>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
+  <div class="footer">
+    <div class="legal-notice">
+      {{#if payment_terms}}
+      <strong>Conditions de paiement :</strong> {{payment_terms}}<br>
+      {{/if}}
+      En cas de retard de paiement, une pénalité de {{late_payment_rate}}% du montant TTC sera exigible sans qu'un rappel soit nécessaire (loi 92-1442 du 31/12/1992).
+    </div>
+    <div class="company-footer">
+      {{company_name}} - SIRET : {{company_siret}} - TVA : {{company_vat}}<br>
+      {{company_legal_form}} au capital de {{company_capital}} € - RCS {{company_rcs}}
+    </div>
+  </div>
+</body>
+</html>
