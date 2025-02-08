@@ -13,3 +13,6 @@ export interface Project {
 }
 
 export type ProjectFormData = Omit<Project, 'id' | 'createdAt' | 'updatedAt'>;
+
+// Update ProjectFormData to remove progress since it's calculated automatically
+export type ProjectFormData = Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'progress'>;

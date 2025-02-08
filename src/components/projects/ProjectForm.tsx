@@ -14,7 +14,6 @@ export function ProjectForm({ isLoading = false, contacts, initialData, onSubmit
   const [formData, setFormData] = React.useState<ProjectFormData>({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    progress: initialData?.progress || 0,
     status: initialData?.status || 'not_started',
     contactId: initialData?.contactId || '',
   });
@@ -28,10 +27,7 @@ export function ProjectForm({ isLoading = false, contacts, initialData, onSubmit
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === 'progress' ? Number(value) : value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const statuses: ProjectStatus[] = [
@@ -93,22 +89,6 @@ export function ProjectForm({ isLoading = false, contacts, initialData, onSubmit
             </option>
           ))}
         </select>
-      </div>
-
-      <div>
-        <label htmlFor="progress" className="block text-sm font-medium text-gray-700">
-          Progress ({formData.progress}%)
-        </label>
-        <input
-          type="range"
-          name="progress"
-          id="progress"
-          min="0"
-          max="100"
-          value={formData.progress}
-          onChange={handleChange}
-          className="mt-1 block w-full"
-        />
       </div>
 
       <div>

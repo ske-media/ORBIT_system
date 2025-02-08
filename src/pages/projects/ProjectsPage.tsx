@@ -34,12 +34,15 @@ export function ProjectsPage({ contacts, tasks, projects, setProjects, setTasks 
 
   const handleCreateProject = async (data: ProjectFormData) => {
     setIsLoading(true);
+    // Set initial progress to 0 as it will be calculated from tasks
+    const initialProgress = 0;
+    
     const { data: newProject, error } = await supabase
       .from('projects')
       .insert({
         name: data.name,
         description: data.description,
-        progress: data.progress,
+        progress: initialProgress,
         status: data.status,
         contact_id: data.contactId
       })
@@ -82,7 +85,6 @@ export function ProjectsPage({ contacts, tasks, projects, setProjects, setTasks 
       .update([{
         name: data.name,
         description: data.description,
-        progress: data.progress,
         status: data.status,
         contact_id: data.contactId
       }])
