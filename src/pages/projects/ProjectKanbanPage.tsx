@@ -1,10 +1,11 @@
 import React from 'react';
-import { Task } from '../../types/task';
+import { Task, TaskFormData } from '../../types/task';
 import { Project } from '../../types/project';
 import { KanbanBoard } from '../../components/projects/KanbanBoard';
 import { ArrowLeft, KanbanSquare, ListTodo, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Notification } from '../../components/ui/Notification';
+import { TaskForm } from '../../components/tasks/TaskForm';
 
 interface ProjectKanbanPageProps {
   project: Project;
@@ -16,6 +17,9 @@ interface ProjectKanbanPageProps {
 export function ProjectKanbanPage({ project, tasks, onUpdateTask, onBack }: ProjectKanbanPageProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
+  const [isTaskFormOpen, setIsTaskFormOpen] = React.useState(false);
+  const [newTaskData, setNewTaskData] = React.useState<TaskFormData | null>(null);
+
   const projectTasks = React.useMemo(() => {
     console.log('Filtering tasks for project:', project.id);
     console.log('Available tasks:', tasks);
@@ -45,6 +49,44 @@ export function ProjectKanbanPage({ project, tasks, onUpdateTask, onBack }: Proj
       console.error('Error updating task:', err);
       setError('Erreur lors de la mise à jour de la tâche');
       setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleCreateTask = async (data: TaskFormData) => {
+    try {
+      const { data: newTask, error } = await supabase
+        .from('tasks')
+        .insert([{
+          title: data.title,
+          description: data.description,
+          due_date: data.dueDate,
+          status: data.status,
+          project_id: data.projectId,
+          assigned_user_ids: data.assignedUserIds
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const task: Task = {
+        id: newTask.id,
+        title: newTask.title,
+        description: newTask.description,
+        dueDate: newTask.due_date,
+        status: newTask.status,
+        projectId: newTask.project_id,
+        assignedUserIds: newTask.assigned_user_ids,
+        createdAt: newTask.created_at,
+        updatedAt: newTask.updated_at
+      };
+
+      onUpdateTask(task.id, task.status);
+      setSuccess('Tâche créée avec succès');
+      setIsTaskFormOpen(false);
+    } catch (err) {
+      console.error('Error creating task:', err);
+      setError('Erreur lors de la création de la tâche');
     }
   };
 
@@ -118,9 +160,30 @@ export function ProjectKanbanPage({ project, tasks, onUpdateTask, onBack }: Proj
           </div>
         </div>
 
+        {isTaskFormOpen && newTaskData && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <TaskForm
+                projects={[project]}
+                initialData={newTaskData}
+                onSubmit={handleCreateTask}
+                onCancel={() => {
+                  setIsTaskFormOpen(false);
+                  setNewTaskData(null);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
         <KanbanBoard 
-          tasks={projectTasks} 
-          onUpdateTask={handleUpdateTask} 
+          tasks={projectTasks}
+          projectId={project.id}
+          onUpdateTask={handleUpdateTask}
+          onCreateTask={(data) => {
+            setNewTaskData(data);
+            setIsTaskFormOpen(true);
+          }}
         />
       </div>
     </div>

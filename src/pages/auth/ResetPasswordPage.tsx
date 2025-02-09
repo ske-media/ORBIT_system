@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Lock } from 'lucide-react';
 import { Notification } from '../../components/ui/Notification';
 import { useNavigate } from 'react-router-dom';
+import { sleep } from '../../utils/async';
 
 export function ResetPasswordPage() {
   const [password, setPassword] = React.useState('');
@@ -16,6 +17,7 @@ export function ResetPasswordPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccess(null);
 
     if (password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
@@ -29,19 +31,29 @@ export function ResetPasswordPage() {
       return;
     }
 
-    const { error } = await supabase.auth.updateUser({
-      password: password
-    });
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
 
-    setIsLoading(false);
+      if (error) {
+        throw error;
+      }
 
-    if (error) {
-      setError(error.message);
-    } else {
       setSuccess('Votre mot de passe a été mis à jour avec succès');
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      
+      // Wait for 2 seconds to show the success message
+      await sleep(2000);
+      
+      // Sign out the user to force a new login with the new password
+      await supabase.auth.signOut();
+      
+      // Navigate to login page
+      navigate('/login');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -1,12 +1,14 @@
 import React from 'react';
-import { Task } from '../../types/task';
-import { Calendar, Users, AlertCircle, Clock } from 'lucide-react';
+import { Task, TaskFormData } from '../../types/task';
+import { Calendar, Users, AlertCircle, Clock, Plus } from 'lucide-react';
 import { User } from '../../types/user';
 import { supabase } from '../../lib/supabase';
 
 interface KanbanBoardProps {
   tasks: Task[];
+  projectId: string;
   onUpdateTask: (taskId: string, status: Task['status']) => void;
+  onCreateTask: (data: TaskFormData) => void;
 }
 
 interface UserCache {
@@ -22,11 +24,13 @@ interface KanbanColumnProps {
   title: string;
   tasks: Task[];
   status: Task['status'];
+  projectId: string;
   stats: ColumnStats;
   onDrop: (taskId: string) => void;
+  onCreateTask: (status: Task['status']) => void;
 }
 
-function KanbanColumn({ title, tasks, status, stats, onDrop }: KanbanColumnProps) {
+function KanbanColumn({ title, tasks, status, projectId, stats, onDrop, onCreateTask }: KanbanColumnProps) {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
@@ -53,24 +57,35 @@ function KanbanColumn({ title, tasks, status, stats, onDrop }: KanbanColumnProps
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-        <div className="flex items-center space-x-2">
-          {stats.overdue > 0 && (
-            <span className="flex items-center text-xs text-red-600">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              {stats.overdue} en retard
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+          <div className="flex items-center space-x-2">
+            {stats.overdue > 0 && (
+              <span className="flex items-center text-xs text-red-600">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {stats.overdue} en retard
+              </span>
+            )}
+            <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded-full">
+              {stats.total}
             </span>
-          )}
-          <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2 py-1 rounded-full">
-            {stats.total}
-          </span>
+          </div>
         </div>
-      </div>
-      <div className="flex-1 space-y-3">
-        {tasks.map((task) => (
-          <KanbanCard key={task.id} task={task} />
-        ))}
+        
+        <button
+          onClick={() => onCreateTask(status)}
+          className="w-full flex items-center justify-center p-2 mb-4 text-sm text-gray-600 bg-white border border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:text-indigo-600 transition-colors"
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Ajouter une tâche
+        </button>
+        
+        <div className="flex-1 space-y-3">
+          {tasks.map((task) => (
+            <KanbanCard key={task.id} task={task} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -169,7 +184,7 @@ function KanbanCard({ task }: { task: Task }) {
   );
 }
 
-export function KanbanBoard({ tasks, onUpdateTask }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, projectId, onUpdateTask, onCreateTask }: KanbanBoardProps) {
   const columns = [
     { title: 'À faire', status: 'todo' as const, color: 'yellow', description: 'Tâches en attente' },
     { title: 'En cours', status: 'in_progress' as const, color: 'blue', description: 'Tâches en cours de réalisation' },
@@ -195,9 +210,24 @@ export function KanbanBoard({ tasks, onUpdateTask }: KanbanBoardProps) {
           <KanbanColumn
             title={column.title}
             status={column.status}
+            projectId={projectId}
             stats={getColumnStats(tasks.filter((task) => task.status === column.status))}
             tasks={tasks.filter((task) => task.status === column.status)}
             onDrop={(taskId, newStatus) => onUpdateTask(taskId, newStatus)}
+            onCreateTask={(status) => {
+              const today = new Date();
+              const tomorrow = new Date(today);
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              
+              onCreateTask({
+                title: '',
+                description: '',
+                dueDate: tomorrow.toISOString().split('T')[0],
+                status: status,
+                projectId: projectId,
+                assignedUserIds: []
+              });
+            }}
           />
         </div>
       ))}
