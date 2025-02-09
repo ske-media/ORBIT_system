@@ -203,7 +203,7 @@ export function KanbanBoard({ tasks, projectId, onUpdateTask, onCreateTask }: Ka
   const [isDragging, setIsDragging] = React.useState(false);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {columns.map((column) => (
         <div key={column.status} className="flex flex-col">
           <div className={`h-1 bg-${column.color}-400 rounded-t-md mb-2`} />

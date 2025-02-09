@@ -101,8 +101,8 @@ export function DashboardStats({ invoices, quotes, contacts, projects }: Dashboa
               <Icon className={`h-6 w-6 ${stat.color}`} />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-              <p className="text-xl sm:text-2xl font-semibold text-gray-900">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">{stat.name}</p>
+              <p className="text-lg sm:text-2xl font-semibold text-gray-900">
                 {stat.value}
               </p>
             </div>

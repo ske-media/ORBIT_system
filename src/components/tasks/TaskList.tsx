@@ -75,7 +75,7 @@ export function TaskList({ tasks, projects, onEdit, onDelete }: TaskListProps) {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="bg-white shadow-md rounded-lg overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -90,7 +90,7 @@ export function TaskList({ tasks, projects, onEdit, onDelete }: TaskListProps) {
         <tbody className="bg-white divide-y divide-gray-200">
           {tasks.map((task) => (
             <tr key={task.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4">
+              <td className="px-6 py-4 min-w-[200px]">
                 <div className="flex items-center">
                   <CheckSquare className="h-5 w-5 text-indigo-500 mr-3" />
                   <div>

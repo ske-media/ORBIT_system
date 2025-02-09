@@ -46,7 +46,7 @@ export function ContactList({ contacts, companies, onEdit, onDelete, onEditCompa
 
   const renderContact = (contact: Contact) => (
     <tr key={contact.id} className="hover:bg-gray-50">
-      <td className="pl-16 pr-6 py-4 whitespace-nowrap">
+      <td className="pl-16 pr-6 py-4 whitespace-nowrap min-w-[200px]">
         <div className="flex items-center">
           <UserCircle className="h-10 w-10 text-gray-400" />
           <div className="ml-4">
@@ -148,7 +148,7 @@ export function ContactList({ contacts, companies, onEdit, onDelete, onEditCompa
   const unassignedContacts = contactsByCompany.get(null) || [];
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="bg-white shadow-md rounded-lg overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>

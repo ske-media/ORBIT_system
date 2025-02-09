@@ -78,7 +78,7 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="bg-white shadow-md rounded-lg overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -109,7 +109,7 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
           {invoices.map((invoice) => (
             <React.Fragment key={invoice.id}>
               <tr key={invoice.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                   <div className="flex items-center">
                     <FileText className="h-5 w-5 text-gray-400" />
                     <span className="ml-2 text-sm font-medium text-gray-900">
