@@ -1,11 +1,16 @@
 import React from 'react';
 import { Task } from '../../types/task';
 import { Calendar, Users, AlertCircle, Clock } from 'lucide-react';
-import { MOCK_USERS } from '../../types/user';
+import { User } from '../../types/user';
+import { supabase } from '../../lib/supabase';
 
 interface KanbanBoardProps {
   tasks: Task[];
   onUpdateTask: (taskId: string, status: Task['status']) => void;
+}
+
+interface UserCache {
+  [key: string]: User;
 }
 
 interface ColumnStats {
@@ -72,7 +77,33 @@ function KanbanColumn({ title, tasks, status, stats, onDrop }: KanbanColumnProps
 }
 
 function KanbanCard({ task }: { task: Task }) {
+  const [users, setUsers] = React.useState<UserCache>({});
   const [isDragging, setIsDragging] = React.useState(false);
+
+  React.useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
+    if (error) {
+      console.error('Error loading users:', error);
+      return;
+    }
+
+    const userCache: UserCache = {};
+    authUsers.forEach(user => {
+      userCache[user.id] = {
+        id: user.id,
+        name: user.email?.split('@')[0] || 'Unknown',
+        email: user.email || '',
+        role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
+        createdAt: user.created_at,
+        updatedAt: user.last_sign_in_at || user.created_at
+      };
+    });
+    setUsers(userCache);
+  };
 
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', task.id);
@@ -84,8 +115,9 @@ function KanbanCard({ task }: { task: Task }) {
   };
 
   const getAssignedUsers = (userIds: string[]) => {
-    return MOCK_USERS
-      .filter(user => userIds.includes(user.id))
+    return userIds
+      .map(id => users[id])
+      .filter(Boolean)
       .map(user => user.name)
       .join(', ');
   };
