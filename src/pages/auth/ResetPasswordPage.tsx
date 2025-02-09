@@ -12,6 +12,7 @@ export function ResetPasswordPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const navigate = useNavigate();
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +33,10 @@ export function ResetPasswordPage() {
     }
 
     try {
+      // First sign out to clear any existing session
+      await supabase.auth.signOut();
+
+      // Then update the password
       const { error } = await supabase.auth.updateUser({
         password: password
       });
@@ -41,12 +46,10 @@ export function ResetPasswordPage() {
       }
 
       setSuccess('Votre mot de passe a été mis à jour avec succès');
+      setIsRedirecting(true);
       
       // Wait for 2 seconds to show the success message
       await sleep(2000);
-      
-      // Sign out the user to force a new login with the new password
-      await supabase.auth.signOut();
       
       // Navigate to login page
       navigate('/login');
@@ -130,13 +133,13 @@ export function ResetPasswordPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isRedirecting}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {isLoading || isRedirecting ? (
                 <div className="flex items-center">
                   <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Mise à jour...
+                  {isRedirecting ? 'Redirection...' : 'Mise à jour...'}
                 </div>
               ) : (
                 'Mettre à jour le mot de passe'
