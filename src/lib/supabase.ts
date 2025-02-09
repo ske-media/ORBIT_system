@@ -1,12 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '../types/supabase';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing Supabase environment variables. Using fallback values.');
+  throw new Error('Missing required Supabase environment variables');
 }
+
+console.log('Initializing Supabase client with:', {
+  url: supabaseUrl,
+  hasAnonKey: !!supabaseAnonKey
+});
 
 export const supabase = createClient<Database>(
   supabaseUrl,
@@ -14,8 +19,7 @@ export const supabase = createClient<Database>(
   {
     auth: {
       persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+      autoRefreshToken: true
     },
     realtime: {
       params: {
@@ -24,6 +28,18 @@ export const supabase = createClient<Database>(
     }
   }
 );
+
+// Helper to get user role
+export const getUserRole = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.user_metadata?.role as 'admin' | 'user' | undefined;
+};
+
+// Helper to check if user is admin
+export const isAdmin = async () => {
+  const role = await getUserRole();
+  return role === 'admin';
+};
 
 // Retry configuration
 const MAX_RETRIES = 3;

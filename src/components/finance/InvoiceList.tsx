@@ -177,10 +177,12 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
                   <button
                     onClick={() => {
                       const contact = contacts.find(c => c.id === invoice.contactId);
-                      if (contact) {
+                      const company = companies.find(c => c.id === invoice.companyId);
+                      if (contact && company) {
                         generateInvoicePdf(
                           invoice,
                           contact,
+                          company,
                           payments.filter(p => p.invoiceId === invoice.id),
                           invoiceTemplate
                         );

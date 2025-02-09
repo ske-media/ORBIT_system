@@ -126,8 +126,14 @@ function QuoteList({ quotes, contacts, projects, onEdit, onDelete, onConvertToIn
                 <button
                   onClick={() => {
                     const contact = contacts.find(c => c.id === quote.contactId);
-                    if (contact) {
-                      generateQuotePdf(quote, contact, quoteTemplate);
+                    const company = companies.find(c => c.id === quote.companyId);
+                    if (contact && company) {
+                      generateQuotePdf(
+                        quote,
+                        contact,
+                        company,
+                        quoteTemplate
+                      );
                     }
                   }}
                   className="text-indigo-600 hover:text-indigo-900 mr-4"

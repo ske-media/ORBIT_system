@@ -53,6 +53,7 @@ const getPaymentMethodLabel = (method: Payment['paymentMethod']): string => {
 export async function generateInvoicePdf(
   invoice: Invoice,
   contact: Contact,
+  company: Company,
   payments: Payment[],
   template: string
 ): Promise<void> {
@@ -67,20 +68,36 @@ export async function generateInvoicePdf(
 
   // Préparer les données pour le template
   const data = {
-    // Informations de l'entreprise
-    ...COMPANY_CONFIG,
+    // Informations de l'entreprise émettrice
+    company_name: 'Votre Entreprise',
+    company_address: '123 rue des Entreprises',
+    company_postal_code: '75000',
+    company_city: 'Paris',
+    company_phone: '01 23 45 67 89',
+    company_email: 'contact@votreentreprise.fr',
+    company_siret: '123 456 789 00012',
+    company_vat: 'FR12345678900',
+    company_legal_form: 'SARL',
+    company_capital: '10000',
+    company_rcs: 'Paris B 123 456 789',
     
     // Informations de la facture
     invoice_number: invoice.id.slice(0, 8).toUpperCase(),
     invoice_date: formatDate(invoice.invoiceDate),
     due_date: formatDate(new Date(invoice.invoiceDate).setDate(new Date(invoice.invoiceDate).getDate() + 30)),
     
-    // Informations du client
-    client_name: `${contact.firstName} ${contact.lastName}`,
-    client_address: contact.address || '',
-    client_postal_code: contact.postal_code || '',
-    client_city: contact.city || '',
-    client_vat: contact.vat || '',
+    // Informations du client (entreprise)
+    client_name: company.name,
+    client_address: company.address || '',
+    client_postal_code: company.postal_code || '',
+    client_city: company.city || '',
+    client_vat: company.vat || '',
+    client_siret: company.siret || '',
+    
+    // Informations du contact
+    contact_name: `${contact.firstName} ${contact.lastName}`,
+    contact_email: contact.email || '',
+    contact_phone: contact.phone || '',
     
     // Lignes de la facture
     lines: invoice.lines.map(line => ({
@@ -140,6 +157,7 @@ export async function generateInvoicePdf(
 export async function generateQuotePdf(
   quote: Quote,
   contact: Contact,
+  company: Company,
   template: string
 ): Promise<void> {
   // Calculer les totaux
@@ -153,8 +171,18 @@ export async function generateQuotePdf(
 
   // Préparer les données pour le template
   const data = {
-    // Informations de l'entreprise
-    ...COMPANY_CONFIG,
+    // Informations de l'entreprise émettrice
+    company_name: 'Votre Entreprise',
+    company_address: '123 rue des Entreprises',
+    company_postal_code: '75000',
+    company_city: 'Paris',
+    company_phone: '01 23 45 67 89',
+    company_email: 'contact@votreentreprise.fr',
+    company_siret: '123 456 789 00012',
+    company_vat: 'FR12345678900',
+    company_legal_form: 'SARL',
+    company_capital: '10000',
+    company_rcs: 'Paris B 123 456 789',
     
     // Informations du devis
     quote_number: quote.id.slice(0, 8).toUpperCase(),
@@ -162,12 +190,18 @@ export async function generateQuotePdf(
     validity_date: formatDate(validityDate.toISOString()),
     validity_duration: '30',
     
-    // Informations du client
-    client_name: `${contact.firstName} ${contact.lastName}`,
-    client_address: contact.address || '',
-    client_postal_code: contact.postal_code || '',
-    client_city: contact.city || '',
-    client_vat: contact.vat || '',
+    // Informations du client (entreprise)
+    client_name: company.name,
+    client_address: company.address || '',
+    client_postal_code: company.postal_code || '',
+    client_city: company.city || '',
+    client_vat: company.vat || '',
+    client_siret: company.siret || '',
+    
+    // Informations du contact
+    contact_name: `${contact.firstName} ${contact.lastName}`,
+    contact_email: contact.email || '',
+    contact_phone: contact.phone || '',
     
     // Lignes du devis
     lines: quote.lines.map(line => ({

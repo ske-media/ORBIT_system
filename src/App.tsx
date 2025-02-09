@@ -1,6 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MainLayout } from './components/layout/MainLayout';
+import { LoginPage } from './pages/auth/LoginPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ContactsPage } from './pages/contacts/ContactsPage';
 import { ProjectsPage } from './pages/projects/ProjectsPage';
@@ -65,17 +68,21 @@ function App() {
   const [payments, setPayments] = React.useState<Payment[]>([]);
 
   React.useEffect(() => {
+    console.log('Checking auth session...');
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Auth session result:', { hasSession: !!session });
       setSession(session);
     });
     
     if (session) {
+      console.log('Session exists, loading initial data...');
       loadInitialData();
     }
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', { hasSession: !!session });
       setSession(session);
       if (session) {
         loadInitialData();
@@ -171,78 +178,21 @@ function App() {
   };
 
   if (!session) {
-    const handleLogin = async () => {
-      setAuthError(null);
-      const { error } = await supabase.auth.signInWithPassword({
-        email: 'demo@example.com',
-        password: 'demo123'
-      });
-
-      if (error) {
-        setAuthError('Erreur de connexion. Veuillez réessayer.');
-        console.error('Login error:', error);
-      }
-    };
-
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div className="max-w-md w-full space-y-8 p-8 rounded-lg shadow-md bg-white dark:bg-gray-800">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">Connexion requise</h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Veuillez vous connecter pour accéder à l'application
-            </p>
-          </div>
-          {authError && (
-            <div className="mt-2 text-sm text-red-600 text-center">
-              {authError}
-            </div>
-          )}
-          <div>
-            <button
-              onClick={handleLogin}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Se connecter
-            </button>
-          </div>
-        </div>
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
     );
   }
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={
-          session ? <Navigate to="/" replace /> : (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-              <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
-                <div className="text-center">
-                  <h2 className="text-3xl font-extrabold text-gray-900">Connexion requise</h2>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Veuillez vous connecter pour accéder à l'application
-                  </p>
-                </div>
-                {authError && (
-                  <div className="mt-2 text-sm text-red-600 text-center">
-                    {authError}
-                  </div>
-                )}
-                <div>
-                  <button
-                    onClick={() => handleLogin()}
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Se connecter
-                  </button>
-                </div>
-              </div>
-            </div>
-          )
-        } />
-
         {/* Protected routes */}
         <Route path="/" element={
           <RequireAuth>

@@ -186,10 +186,17 @@
   <div class="client-info">
     <div class="client-title">ADRESSÉ À</div>
     <div>
-      <strong>{{client_name}}</strong><br>
+      <strong>{{client_name}}</strong>
+      {{#if client_siret}}<br>SIRET : {{client_siret}}{{/if}}
+      {{#if client_vat}}<br>TVA : {{client_vat}}{{/if}}<br>
       {{client_address}}<br>
-      {{client_postal_code}} {{client_city}}<br>
-      {{#if client_vat}}TVA : {{client_vat}}{{/if}}
+      {{client_postal_code}} {{client_city}}
+    </div>
+    <div class="mt-4">
+      <strong>Contact :</strong><br>
+      {{contact_name}}<br>
+      {{#if contact_email}}Email : {{contact_email}}<br>{{/if}}
+      {{#if contact_phone}}Tél : {{contact_phone}}{{/if}}
     </div>
   </div>
 
