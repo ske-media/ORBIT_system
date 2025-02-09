@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,13 +7,15 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react']
   },
-  assetsInclude: ['**/*.html'],
   build: {
+    outDir: 'dist',
+    emptyOutDir: true,  // 🔹 Nettoie `dist/` avant chaque build
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'),  // 🔹 Correction ici
-    },
-    outDir: 'dist', // 🔹 Vérifier que le build va bien dans `dist/`
+      input: 'index.html',  // 🔹 Assure que Vite utilise bien `index.html` comme point d’entrée
+    }
   },
-  publicDir: 'public', // 🔹 Permet d'inclure correctement les fichiers publics
-  base: "./", // 🔹 Corrige les chemins relatifs pour Netlify
+  server: {
+    open: true
+  },
+  base: './'  // 🔹 Fixe les chemins relatifs pour Netlify
 });
