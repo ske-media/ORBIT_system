@@ -89,20 +89,20 @@ export function DashboardStats({ invoices, quotes, contacts, projects }: Dashboa
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
           <div
             key={stat.name}
-            className="bg-white rounded-lg shadow-md p-6 flex items-center"
+            className="bg-white rounded-lg shadow-md p-4 sm:p-6 flex items-center"
           >
             <div className={`${stat.bgColor} rounded-lg p-3 mr-4`}>
               <Icon className={`h-6 w-6 ${stat.color}`} />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-xl sm:text-2xl font-semibold text-gray-900">
                 {stat.value}
               </p>
             </div>

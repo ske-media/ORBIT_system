@@ -116,10 +116,10 @@ export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: Dai
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-8">
       <h2 className="text-lg font-semibold text-gray-900 mb-6">Briefing Quotidien</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Today's Tasks */}
         <div>
           <div className="flex items-center mb-4">
@@ -134,7 +134,7 @@ export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: Dai
                 <div key={userId} className="space-y-2">
                   <div className="text-sm font-medium text-gray-500">{user?.name || 'Non assigné'}</div>
                   {userTasks.map(task => (
-                    <div key={task.id} className="flex items-start space-x-3 bg-gray-50 p-3 rounded-lg">
+                    <div key={task.id} className="flex items-start space-x-2 sm:space-x-3 bg-gray-50 p-2 sm:p-3 rounded-lg">
                       <button
                         onClick={() => onTaskComplete(task.id)}
                         className="mt-0.5 text-gray-400 hover:text-green-600 transition-colors"
@@ -173,7 +173,7 @@ export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: Dai
               const nextDeadline = new Date(Math.min(...projectTasks.map(t => new Date(t.dueDate).getTime())));
               
               return (
-                <div key={project.id} className="bg-gray-50 p-3 rounded-lg">
+                <div key={project.id} className="bg-gray-50 p-2 sm:p-3 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-900">{project.name}</span>
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getProjectUrgencyColor(project)}`}>
@@ -210,7 +210,7 @@ export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: Dai
           
           <div className="space-y-3">
             {pendingInvoices.map(invoice => (
-              <div key={invoice.id} className="bg-gray-50 p-3 rounded-lg">
+              <div key={invoice.id} className="bg-gray-50 p-2 sm:p-3 rounded-lg">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-gray-900">
                     Facture #{invoice.id.slice(0, 8)}

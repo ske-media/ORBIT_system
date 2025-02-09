@@ -3,8 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { MainLayout } from './components/layout/MainLayout';
 import { LoginPage } from './pages/auth/LoginPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
-import { SignupPage } from './pages/auth/SignupPage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
+import { SignupPage } from './pages/auth/SignupPage';
+import { PasswordResetPage } from './pages/auth/PasswordResetPage';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { ContactsPage } from './pages/contacts/ContactsPage';
 import { ProjectsPage } from './pages/projects/ProjectsPage';
@@ -183,9 +184,9 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/password-reset" element={<ResetPasswordPage />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
@@ -195,59 +196,21 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Protected routes */}
-        <Route path="/" element={
-          <RequireAuth>
-            <MainLayout />
-          </RequireAuth>
-        }>
-          <Route index element={
-            <DashboardPage 
-              projects={projects} 
-              tasks={tasks} 
-              contacts={contacts}
-              setTasks={setTasks}
-            />
-          } />
-          <Route path="contacts" element={
-            <ContactsPage 
-              contacts={contacts} 
-              setContacts={setContacts}
-              companies={companies}
-              setCompanies={setCompanies}
-            />
-          } />
-          <Route path="projects" element={
-            <ProjectsPage 
-              contacts={contacts} 
-              tasks={tasks} 
-              setTasks={setTasks} 
-              projects={projects} 
-              setProjects={setProjects} 
-            />
-          } />
-          <Route path="tasks" element={
-            <TasksPage projects={projects} tasks={tasks} setTasks={setTasks} />
-          } />
-          <Route path="finance" element={
-            <FinancePage 
-              contacts={contacts} 
-              projects={projects}
-              companies={companies}
-              invoices={invoices}
-              quotes={quotes}
-              payments={payments}
-              setInvoices={setInvoices}
-              setQuotes={setQuotes}
-              setPayments={setPayments}
-            />
-          } />
-          <Route path="settings" element={
-            <SettingsPage />
-          } />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <MainLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<DashboardPage projects={projects} tasks={tasks} contacts={contacts} setTasks={setTasks} />} />
+          <Route path="contacts" element={<ContactsPage contacts={contacts} setContacts={setContacts} companies={companies} setCompanies={setCompanies} />} />
+          <Route path="projects" element={<ProjectsPage contacts={contacts} tasks={tasks} setTasks={setTasks} projects={projects} setProjects={setProjects} />} />
+          <Route path="tasks" element={<TasksPage projects={projects} tasks={tasks} setTasks={setTasks} />} />
+          <Route path="finance" element={<FinancePage contacts={contacts} projects={projects} companies={companies} invoices={invoices} quotes={quotes} payments={payments} setInvoices={setInvoices} setQuotes={setQuotes} setPayments={setPayments} />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
-
-        {/* Catch all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

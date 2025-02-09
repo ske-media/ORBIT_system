@@ -173,12 +173,12 @@ export function LoginPage() {
                 Créer un compte
               </Link>
             </div>
-            <a
-              href="/forgot-password"
+            <Link
+              to="/forgot-password"
               className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 hover:underline"
             >
               Mot de passe oublié ?
-            </a>
+            </Link>
           </div>
         </form>
       </div>
