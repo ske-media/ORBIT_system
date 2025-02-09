@@ -1,52 +1,65 @@
 import React from 'react';
 import { supabase } from '../../lib/supabase';
-import { Lock } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { Notification } from '../../components/ui/Notification';
 import { Link, useNavigate } from 'react-router-dom';
 
-export function LoginPage() {
+export function SignupPage() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
-  const [rememberMe, setRememberMe] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    // Validate password match
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères');
+      setIsLoading(false);
+      return;
+    }
     
     try {
-      console.log('Attempting login with:', { email });
-
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          data: {
+            role: 'user'
+          }
+        }
       });
 
-      if (error) {
-        console.error('Supabase auth error:', error);
-        throw error;
-      }
-      
-      console.log('Login successful:', data);
+      if (error) throw error;
 
+      if (data.user) {
+        navigate('/login');
+      }
     } catch (err) {
       let message = 'Une erreur est survenue. Veuillez réessayer.';
       
       if (err instanceof Error) {
-        if (err.message.includes('Invalid login credentials')) {
-          message = 'Identifiants incorrects. Veuillez vérifier votre email et mot de passe.';
-        } else if (err.message.includes('Email not confirmed')) {
-          message = 'Votre email n\'a pas été confirmé. Veuillez vérifier votre boîte de réception.';
+        if (err.message.includes('Email already registered')) {
+          message = 'Cette adresse email est déjà utilisée';
         } else {
           message = err.message;
         }
       }
       
       setError(message);
-      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -56,12 +69,12 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
       <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <div className="text-center">
-          <Lock className="mx-auto h-12 w-12 text-indigo-600" />
+          <UserPlus className="mx-auto h-12 w-12 text-indigo-600" />
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-            Connexion
+            Créer un compte
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Connectez-vous à votre compte
+            Rejoignez l'équipe Orbit
           </p>
         </div>
 
@@ -103,7 +116,7 @@ export function LoginPage() {
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 placeholder="••••••••"
                 value={password}
@@ -132,21 +145,24 @@ export function LoginPage() {
             </p>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Confirmer le mot de passe
+            </label>
+            <div className="mt-1">
               <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                id="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Se souvenir de moi
-              </label>
             </div>
           </div>
+
           <div>
             <button
               type="submit"
@@ -156,29 +172,21 @@ export function LoginPage() {
               {isLoading ? (
                 <div className="flex items-center">
                   <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Connexion...
+                  Création du compte...
                 </div>
               ) : (
-                'Se connecter'
+                'Créer le compte'
               )}
             </button>
           </div>
 
           <div className="text-center">
-            <div className="mb-4">
-              <Link
-                to="/signup"
-                className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 hover:underline"
-              >
-                Créer un compte
-              </Link>
-            </div>
-            <a
-              href="/forgot-password"
+            <Link
+              to="/login"
               className="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 hover:underline"
             >
-              Mot de passe oublié ?
-            </a>
+              Déjà un compte ? Se connecter
+            </Link>
           </div>
         </form>
       </div>

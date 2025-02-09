@@ -7,22 +7,17 @@ export interface User {
   updatedAt: string;
 }
 
-// Temporary mock users for development
-export const MOCK_USERS: User[] = [
-  {
-    id: 'steven@agence-orbit.ch',
-    name: 'Steven',
-    email: 'steven@agence-orbit.ch',
-    role: 'admin',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'oceane@agence-orbit.ch',
-    name: 'Océane',
-    email: 'oceane@agence-orbit.ch',
-    role: 'user',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+// Get users from Supabase auth
+export async function getUsers() {
+  const { data: { users }, error } = await supabase.auth.admin.listUsers();
+  if (error) throw error;
+  
+  return users.map(user => ({
+    id: user.id,
+    name: user.email?.split('@')[0] || 'Unknown',
+    email: user.email || '',
+    role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
+    createdAt: user.created_at,
+    updatedAt: user.last_sign_in_at || user.created_at
+  }));
+}
