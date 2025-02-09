@@ -1,7 +1,8 @@
 import React from 'react';
 import { Task, TaskFormData, TaskStatus } from '../../types/task';
 import { Project } from '../../types/project';
-import { MOCK_USERS } from '../../types/user';
+import { User } from '../../types/user';
+import { supabase } from '../../lib/supabase';
 
 interface TaskFormProps {
   projects: Project[];
@@ -10,7 +11,38 @@ interface TaskFormProps {
   onCancel: () => void;
 }
 
+interface UserCache {
+  [key: string]: User;
+}
+
 export function TaskForm({ projects, initialData, onSubmit, onCancel }: TaskFormProps) {
+  const [users, setUsers] = React.useState<UserCache>({});
+
+  React.useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
+    if (error) {
+      console.error('Error loading users:', error);
+      return;
+    }
+
+    const userCache: UserCache = {};
+    authUsers.forEach(user => {
+      userCache[user.id] = {
+        id: user.id,
+        name: user.email?.split('@')[0] || 'Unknown',
+        email: user.email || '',
+        role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
+        createdAt: user.created_at,
+        updatedAt: user.last_sign_in_at || user.created_at
+      };
+    });
+    setUsers(userCache);
+  };
+
   const [formData, setFormData] = React.useState<TaskFormData>({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -103,7 +135,7 @@ export function TaskForm({ projects, initialData, onSubmit, onCancel }: TaskForm
           Assigned Users
         </label>
         <div className="space-y-2">
-          {MOCK_USERS.map((user) => (
+          {Object.values(users).map((user) => (
             <label key={user.id} className="flex items-center">
               <input
                 type="checkbox"

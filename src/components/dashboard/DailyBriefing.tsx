@@ -1,9 +1,9 @@
 import React from 'react';
 import { Task } from '../../types/task';
 import { Project } from '../../types/project';
-import { Invoice } from '../../types/finance';
-import { MOCK_USERS } from '../../types/user';
+import { User } from '../../types/user';
 import { CheckCircle2, AlertCircle, Clock, Calendar, FileText, CheckCircle } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface DailyBriefingProps {
   tasks: Task[];
@@ -12,15 +12,46 @@ interface DailyBriefingProps {
   onTaskComplete: (taskId: string) => void;
 }
 
-const isSameDay = (date1: Date, date2: Date) => {
-  return (
-    date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
-  );
-};
+interface UserCache {
+  [key: string]: User;
+}
 
 export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: DailyBriefingProps) {
+  const [users, setUsers] = React.useState<UserCache>({});
+
+  React.useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
+    if (error) {
+      console.error('Error loading users:', error);
+      return;
+    }
+
+    const userCache: UserCache = {};
+    authUsers.forEach(user => {
+      userCache[user.id] = {
+        id: user.id,
+        name: user.email?.split('@')[0] || 'Unknown',
+        email: user.email || '',
+        role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
+        createdAt: user.created_at,
+        updatedAt: user.last_sign_in_at || user.created_at
+      };
+    });
+    setUsers(userCache);
+  };
+
+  const isSameDay = (date1: Date, date2: Date) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  };
+
   // Get today's tasks
   const todayTasks = tasks.filter(task => {
     const taskDate = new Date(task.dueDate);
@@ -76,6 +107,14 @@ export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: Dai
     return 'bg-green-100 text-green-800';
   };
 
+  const getAssignedUsers = (userIds: string[]) => {
+    return userIds
+      .map(id => users[id])
+      .filter(Boolean)
+      .map(user => user.name)
+      .join(', ');
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
       <h2 className="text-lg font-semibold text-gray-900 mb-6">Briefing Quotidien</h2>
@@ -90,7 +129,7 @@ export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: Dai
           
           <div className="space-y-6">
             {Object.entries(tasksByUser).map(([userId, userTasks]) => {
-              const user = MOCK_USERS.find(u => u.id === userId);
+              const user = users[userId];
               return (
                 <div key={userId} className="space-y-2">
                   <div className="text-sm font-medium text-gray-500">{user?.name || 'Non assigné'}</div>

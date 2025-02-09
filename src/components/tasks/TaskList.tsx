@@ -1,8 +1,9 @@
 import React from 'react';
 import { Task } from '../../types/task';
 import { Project } from '../../types/project';
-import { User, MOCK_USERS } from '../../types/user';
+import { User } from '../../types/user';
 import { Edit, Trash2, CheckSquare, Calendar, Users } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface TaskListProps {
   tasks: Task[];
@@ -11,15 +12,47 @@ interface TaskListProps {
   onDelete: (id: string) => void;
 }
 
+interface UserCache {
+  [key: string]: User;
+}
+
 export function TaskList({ tasks, projects, onEdit, onDelete }: TaskListProps) {
+  const [users, setUsers] = React.useState<UserCache>({});
+
+  React.useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
+    if (error) {
+      console.error('Error loading users:', error);
+      return;
+    }
+
+    const userCache: UserCache = {};
+    authUsers.forEach(user => {
+      userCache[user.id] = {
+        id: user.id,
+        name: user.email?.split('@')[0] || 'Unknown',
+        email: user.email || '',
+        role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
+        createdAt: user.created_at,
+        updatedAt: user.last_sign_in_at || user.created_at
+      };
+    });
+    setUsers(userCache);
+  };
+
   const getProjectName = (projectId: string) => {
     const project = projects.find(p => p.id === projectId);
     return project ? project.name : 'Unknown Project';
   };
 
   const getAssignedUsers = (userIds: string[]) => {
-    return MOCK_USERS
-      .filter(user => Array.isArray(userIds) && userIds.includes(user.id))
+    return userIds
+      .map(id => users[id])
+      .filter(Boolean)
       .map(user => user.name)
       .join(', ');
   };
