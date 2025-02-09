@@ -69,32 +69,9 @@ function App() {
   const [quotes, setQuotes] = React.useState<Quote[]>([]);
   const [payments, setPayments] = React.useState<Payment[]>([]);
 
-  React.useEffect(() => {
-    console.log('Checking auth session...');
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Auth session result:', { hasSession: !!session });
-      setSession(session);
-    });
-    
-    if (session) {
-      console.log('Session exists, loading initial data...');
-      loadInitialData();
-    }
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', { hasSession: !!session });
-      setSession(session);
-      if (session) {
-        loadInitialData();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-  
   const loadInitialData = async () => {
+    console.log('Loading initial data...');
+
     // Load projects
     const { data: projectsData, error: projectsError } = await retryableQuery(() =>
       supabase
@@ -108,6 +85,7 @@ function App() {
     
     if (projectsError) {
       console.error('Error loading projects:', projectsError);
+      return;
     } else {
       setProjects(projectsData.map(project => ({
         id: project.id,
@@ -132,6 +110,7 @@ function App() {
     
     if (tasksError) {
       console.error('Error loading tasks:', tasksError);
+      return;
     } else {
       setTasks(tasksData);
     }
@@ -149,6 +128,7 @@ function App() {
     
     if (contactsError) {
       console.error('Error loading contacts:', contactsError);
+      return;
     } else {
       setContacts(contactsData.map(contact => ({
         id: contact.id,
@@ -174,10 +154,76 @@ function App() {
     
     if (companiesError) {
       console.error('Error loading companies:', companiesError);
+      return;
     } else {
       setCompanies(companiesData);
     }
+
+    // Load invoices
+    const { data: invoicesData, error: invoicesError } = await retryableQuery(() =>
+      supabase
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false })
+    );
+
+    if (invoicesError) {
+      console.error('Error loading invoices:', invoicesError);
+      return;
+    }
+
+    setInvoices(invoicesData);
+
+    // Load quotes
+    const { data: quotesData, error: quotesError } = await retryableQuery(() =>
+      supabase
+        .from('quotes')
+        .select('*')
+        .order('created_at', { ascending: false })
+    );
+
+    if (quotesError) {
+      console.error('Error loading quotes:', quotesError);
+      return;
+    }
+
+    setQuotes(quotesData);
+
+    // Load payments
+    const { data: paymentsData, error: paymentsError } = await retryableQuery(() =>
+      supabase
+        .from('invoice_payments')
+        .select('*')
+        .order('created_at', { ascending: false })
+    );
+
+    if (paymentsError) {
+      console.error('Error loading payments:', paymentsError);
+      return;
+    }
+
+    setPayments(paymentsData);
+
+    console.log('Initial data loaded successfully');
   };
+
+  // Load initial data when session changes
+  React.useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load data when session is available
+  React.useEffect(() => {
+    if (session) {
+      loadInitialData();
+    }
+  }, [session]);
 
   if (!session) {
     return (
