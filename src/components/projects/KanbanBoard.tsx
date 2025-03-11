@@ -96,29 +96,27 @@ function KanbanCard({ task }: { task: Task }) {
   const [isDragging, setIsDragging] = React.useState(false);
 
   React.useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
-    if (error) {
-      console.error('Error loading users:', error);
-      return;
-    }
-
+    // Initialize with minimal user info - we don't need to actually load all users
+    // for the kanban card, since we're just using it for display
     const userCache: UserCache = {};
-    authUsers.forEach(user => {
-      userCache[user.id] = {
-        id: user.id,
-        name: user.email?.split('@')[0] || 'Unknown',
-        email: user.email || '',
-        role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
-        createdAt: user.created_at,
-        updatedAt: user.last_sign_in_at || user.created_at
-      };
+    
+    // Get current user at minimum
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        userCache[data.user.id] = {
+          id: data.user.id,
+          name: data.user.email?.split('@')[0] || 'Current User',
+          email: data.user.email || '',
+          role: (data.user.user_metadata?.role as 'admin' | 'user') || 'user',
+          createdAt: data.user.created_at,
+          updatedAt: data.user.last_sign_in_at || data.user.created_at
+        };
+        setUsers(userCache);
+      }
+    }).catch(error => {
+      console.error('Error getting current user:', error);
     });
-    setUsers(userCache);
-  };
+  }, []);
 
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', task.id);

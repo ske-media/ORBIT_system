@@ -19,29 +19,26 @@ export function TaskForm({ projects, initialData, onSubmit, onCancel }: TaskForm
   const [users, setUsers] = React.useState<UserCache>({});
 
   React.useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
-    if (error) {
-      console.error('Error loading users:', error);
-      return;
-    }
-
+    // Initialize with minimal user info
     const userCache: UserCache = {};
-    authUsers.forEach(user => {
-      userCache[user.id] = {
-        id: user.id,
-        name: user.email?.split('@')[0] || 'Unknown',
-        email: user.email || '',
-        role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
-        createdAt: user.created_at,
-        updatedAt: user.last_sign_in_at || user.created_at
-      };
+    
+    // Get current user
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        userCache[data.user.id] = {
+          id: data.user.id,
+          name: data.user.email?.split('@')[0] || 'Current User',
+          email: data.user.email || '',
+          role: (data.user.user_metadata?.role as 'admin' | 'user') || 'user',
+          createdAt: data.user.created_at,
+          updatedAt: data.user.last_sign_in_at || data.user.created_at
+        };
+        setUsers(userCache);
+      }
+    }).catch(error => {
+      console.error('Error getting current user:', error);
     });
-    setUsers(userCache);
-  };
+  }, []);
 
   const [formData, setFormData] = React.useState<TaskFormData>({
     title: initialData?.title || '',
@@ -135,17 +132,22 @@ export function TaskForm({ projects, initialData, onSubmit, onCancel }: TaskForm
           Assigned Users
         </label>
         <div className="space-y-2">
-          {Object.values(users).map((user) => (
-            <label key={user.id} className="flex items-center">
+          {Object.entries(users).map(([userId, user]) => (
+            <label key={userId} className="flex items-center">
               <input
                 type="checkbox"
-                checked={formData.assignedUserIds.includes(user.id)}
-                onChange={() => handleUserSelection(user.id)}
+                checked={formData.assignedUserIds.includes(userId)}
+                onChange={() => handleUserSelection(userId)}
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
               <span className="ml-2 text-sm text-gray-900">{user.name}</span>
             </label>
           ))}
+          {Object.keys(users).length === 0 && (
+            <p className="text-sm text-gray-500">
+              Assign to yourself (current user) by default
+            </p>
+          )}
         </div>
       </div>
 

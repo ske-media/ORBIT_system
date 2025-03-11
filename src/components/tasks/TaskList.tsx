@@ -20,29 +20,26 @@ export function TaskList({ tasks, projects, onEdit, onDelete }: TaskListProps) {
   const [users, setUsers] = React.useState<UserCache>({});
 
   React.useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    const { data: { users: authUsers }, error } = await supabase.auth.admin.listUsers();
-    if (error) {
-      console.error('Error loading users:', error);
-      return;
-    }
-
+    // Initialize with minimal user info
     const userCache: UserCache = {};
-    authUsers.forEach(user => {
-      userCache[user.id] = {
-        id: user.id,
-        name: user.email?.split('@')[0] || 'Unknown',
-        email: user.email || '',
-        role: (user.user_metadata?.role as 'admin' | 'user') || 'user',
-        createdAt: user.created_at,
-        updatedAt: user.last_sign_in_at || user.created_at
-      };
+    
+    // Get current user at minimum
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        userCache[data.user.id] = {
+          id: data.user.id,
+          name: data.user.email?.split('@')[0] || 'Current User',
+          email: data.user.email || '',
+          role: (data.user.user_metadata?.role as 'admin' | 'user') || 'user',
+          createdAt: data.user.created_at,
+          updatedAt: data.user.last_sign_in_at || data.user.created_at
+        };
+        setUsers(userCache);
+      }
+    }).catch(error => {
+      console.error('Error getting current user:', error);
     });
-    setUsers(userCache);
-  };
+  }, []);
 
   const getProjectName = (projectId: string) => {
     const project = projects.find(p => p.id === projectId);
