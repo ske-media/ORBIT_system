@@ -47,11 +47,14 @@ export function TaskList({ tasks, projects, onEdit, onDelete }: TaskListProps) {
   };
 
   const getAssignedUsers = (userIds: string[]) => {
-    return userIds
+    if (!userIds || !userIds.length) return 'Unassigned';
+    
+    const assignedUsers = userIds
       .map(id => users[id])
-      .filter(Boolean)
-      .map(user => user.name)
-      .join(', ');
+      .filter(Boolean) // Filter out undefined users
+      .map(user => user.name);
+    
+    return assignedUsers.length > 0 ? assignedUsers.join(', ') : 'Unassigned';
   };
 
   const getStatusColor = (status: Task['status']) => {
@@ -72,65 +75,71 @@ export function TaskList({ tasks, projects, onEdit, onDelete }: TaskListProps) {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+    <div className="bg-white shadow-md rounded-lg w-full">
+      <table className="w-full table-fixed divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th className="w-1/3 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+            <th className="w-1/12 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th className="w-1/12 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {tasks.map((task) => (
             <tr key={task.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 min-w-[200px]">
+              <td className="px-3 py-4 truncate">
                 <div className="flex items-center">
-                  <CheckSquare className="h-5 w-5 text-indigo-500 mr-3" />
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                  <CheckSquare className="h-5 w-5 text-indigo-500 flex-shrink-0 mr-2" />
+                  <div className="truncate">
+                    <div className="text-sm font-medium text-gray-900 truncate">{task.title}</div>
                     {task.description && (
-                      <div className="text-sm text-gray-500">{task.description}</div>
+                      <div className="text-sm text-gray-500 truncate">{task.description}</div>
                     )}
                   </div>
                 </div>
               </td>
-              <td className="px-6 py-4">
-                <span className="text-sm text-gray-900">{getProjectName(task.projectId)}</span>
+              <td className="px-3 py-4 truncate">
+                <span className="text-sm text-gray-900 truncate">{getProjectName(task.projectId)}</span>
               </td>
-              <td className="px-6 py-4">
+              <td className="px-3 py-4 truncate">
                 <div className="flex items-center">
-                  <Users className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-900">{getAssignedUsers(task.assignedUserIds)}</span>
+                  <Users className="h-4 w-4 text-gray-400 flex-shrink-0 mr-1" />
+                  <span className="text-sm text-gray-900 truncate">{getAssignedUsers(task.assignedUserIds)}</span>
                 </div>
               </td>
-              <td className="px-6 py-4">
+              <td className="px-3 py-4 truncate">
                 <div className="flex items-center">
-                  <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-900">{formatDate(task.dueDate)}</span>
+                  <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0 mr-1" />
+                  <span className="text-sm text-gray-900 truncate">{formatDate(task.dueDate)}</span>
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-3 py-4">
                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(task.status)}`}>
-                  {task.status.replace('_', ' ')}
+                  {task.status === 'todo' ? 'À faire' :
+                   task.status === 'in_progress' ? 'En cours' :
+                   task.status === 'done' ? 'Terminé' : task.status}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button
-                  onClick={() => onEdit(task)}
-                  className="text-indigo-600 hover:text-indigo-900 mr-4"
-                >
-                  <Edit className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => onDelete(task.id)}
-                  className="text-red-600 hover:text-red-900"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
+              <td className="px-3 py-4 text-sm font-medium">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => onEdit(task)}
+                    className="text-indigo-600 hover:text-indigo-900"
+                    title="Modifier"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(task.id)}
+                    className="text-red-600 hover:text-red-900"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

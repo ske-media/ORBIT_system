@@ -29,15 +29,15 @@ export function ProjectList({ projects, contacts, onViewKanban, onEdit, onDelete
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
+    <div className="bg-white shadow-md rounded-lg w-full">
+      <table className="w-full table-fixed divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th className="w-2/5 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+            <th className="w-1/5 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+            <th className="w-1/5 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
+            <th className="w-1/8 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th className="w-1/8 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -46,61 +46,65 @@ export function ProjectList({ projects, contacts, onViewKanban, onEdit, onDelete
               key={project.id} 
               className="hover:bg-gray-50 cursor-pointer transition-colors duration-150 group"
             >
-              <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+              <td className="px-3 py-4 truncate">
                 <div className="flex items-center">
-                  <FolderKanban className="h-10 w-10 text-indigo-500" />
-                  <div className="ml-4 flex-1">
-                    <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                    <div className="text-sm text-gray-500">{project.description}</div>
+                  <FolderKanban className="h-8 w-8 text-indigo-500 flex-shrink-0" />
+                  <div className="ml-3 flex-1 truncate">
+                    <div className="text-sm font-medium text-gray-900 truncate">{project.name}</div>
+                    <div className="text-sm text-gray-500 truncate">{project.description}</div>
                   </div>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onViewKanban(project);
-                    }}
-                    className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md px-2 py-1"
+                    onClick={() => onViewKanban(project)}
+                    className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md flex-shrink-0"
                   >
                     <span className="text-xs text-indigo-600">
-                      Voir le tableau Kanban →
+                      Kanban →
                     </span>
                   </button>
                 </div>
               </td>
-              <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+              <td className="px-3 py-4 truncate">
                 <div className="flex items-center">
-                  <User className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-900">{getContactName(project.contactId)}</span>
+                  <User className="h-5 w-5 text-gray-400 flex-shrink-0 mr-1" />
+                  <span className="text-sm text-gray-900 truncate">{getContactName(project.contactId)}</span>
                 </div>
               </td>
-              <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <td className="px-3 py-4">
+                <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-indigo-600 h-2.5 rounded-full"
+                    className="bg-indigo-600 h-2 rounded-full"
                     style={{ width: `${project.progress}%` }}
                   ></div>
                 </div>
-                <span className="text-sm text-gray-500 mt-1">{project.progress}%</span>
+                <span className="text-xs text-gray-500 mt-1">{project.progress}%</span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+              <td className="px-3 py-4">
                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(project.status)}`}>
-                  {project.status.replace('_', ' ')}
+                  {project.status === 'not_started' ? 'À faire' :
+                   project.status === 'in_progress' ? 'En cours' :
+                   project.status === 'completed' ? 'Terminé' :
+                   project.status === 'on_hold' ? 'En pause' :
+                   project.status === 'cancelled' ? 'Annulé' : 
+                   project.status.replace('_', ' ')}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={() => onEdit(project)}
-                  className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  title="Modifier"
-                >
-                  <Edit className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => onDelete(project.id)}
-                  className="text-red-600 hover:text-red-900"
-                  title="Supprimer"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
+              <td className="px-3 py-4 text-sm font-medium">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => onEdit(project)}
+                    className="text-indigo-600 hover:text-indigo-900"
+                    title="Modifier"
+                  >
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => onDelete(project.id)}
+                    className="text-red-600 hover:text-red-900"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

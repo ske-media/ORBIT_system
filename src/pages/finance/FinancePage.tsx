@@ -243,6 +243,62 @@ export function FinancePage({
     setIsCreatingQuote(false);
   };
 
+  const handleUpdateQuote = async (data: QuoteFormData) => {
+    if (!editingQuote) return;
+    setError(null);
+    
+    try {
+      // Update the quote
+      const { error: quoteError } = await supabase
+        .from('quotes')
+        .update({
+          company_id: data.companyId,
+          contact_id: data.contactId,
+          project_id: data.projectId,
+          quote_date: data.quoteDate,
+          status: data.status,
+          total_amount: data.totalAmount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingQuote.id);
+  
+      if (quoteError) {
+        throw new Error(`Erreur lors de la mise à jour du devis: ${quoteError.message}`);
+      }
+
+      // Delete existing quote lines
+      const { error: deleteError } = await supabase
+        .from('quote_lines')
+        .delete()
+        .eq('quote_id', editingQuote.id);
+      
+      if (deleteError) {
+        throw new Error(`Erreur lors de la suppression des lignes de devis: ${deleteError.message}`);
+      }
+
+      // Insert new quote lines
+      const { error: linesError } = await supabase
+        .from('quote_lines')
+        .insert(data.lines.map(line => ({
+          quote_id: editingQuote.id,
+          description: line.description,
+          quantity: line.quantity,
+          unit_price: line.unitPrice
+        })));
+      
+      if (linesError) {
+        throw new Error(`Erreur lors de la création des lignes de devis: ${linesError.message}`);
+      }
+
+      loadFinanceData();
+      setSuccess('Devis mis à jour avec succès');
+      setEditingQuote(undefined);
+    } catch (err) {
+      console.error('Error updating quote:', err);
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la mise à jour du devis');
+    }
+  };
+
   const handleAddPayment = async (data: PaymentFormData) => {
     if (!selectedInvoice) return;
 
@@ -532,6 +588,19 @@ export function FinancePage({
               setIsInvoiceFormOpen(false);
               setEditingInvoice(undefined);
             }}
+          />
+        </div>
+      )}
+
+      {editingQuote && (
+        <div className="mb-6">
+          <QuoteForm
+            contacts={contacts}
+            companies={companies}
+            projects={projects}
+            initialData={editingQuote}
+            onSubmit={handleUpdateQuote}
+            onCancel={() => setEditingQuote(undefined)}
           />
         </div>
       )}

@@ -128,11 +128,10 @@ function KanbanCard({ task }: { task: Task }) {
   };
 
   const getAssignedUsers = (userIds: string[]) => {
-    return userIds
-      .map(id => users[id])
-      .filter(Boolean)
-      .map(user => user.name)
-      .join(', ');
+    if (!userIds || userIds.length === 0) return '';
+    
+    // Count the assigned users rather than showing names since we might not have all user data
+    return userIds.length.toString();
   };
 
   const formatDate = (dateString: string) => {

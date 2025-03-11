@@ -105,11 +105,14 @@ export function DailyBriefing({ tasks, projects, invoices, onTaskComplete }: Dai
   };
 
   const getAssignedUsers = (userIds: string[]) => {
-    return userIds
+    if (!userIds || !userIds.length) return 'Unassigned';
+    
+    const assignedUsers = userIds
       .map(id => users[id])
-      .filter(Boolean)
-      .map(user => user.name)
-      .join(', ');
+      .filter(Boolean) // Filter out undefined users
+      .map(user => user.name);
+    
+    return assignedUsers.length > 0 ? assignedUsers.join(', ') : 'Unassigned';
   };
 
   return (

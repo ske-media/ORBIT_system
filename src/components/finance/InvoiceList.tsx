@@ -78,29 +78,29 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+    <div className="bg-white shadow-md rounded-lg w-full">
+      <table className="w-full table-fixed divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Facture
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Contact
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Date
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Montant
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Reste à payer
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Statut
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-1/6 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -109,55 +109,50 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
           {invoices.map((invoice) => (
             <React.Fragment key={invoice.id}>
               <tr key={invoice.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
+                <td className="px-3 py-4 truncate">
                   <div className="flex items-center">
-                    <FileText className="h-5 w-5 text-gray-400" />
-                    <span className="ml-2 text-sm font-medium text-gray-900">
-                      Facture #{invoice.id.slice(0, 8)}
+                    <FileText className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    <span className="ml-2 text-sm font-medium text-gray-900 truncate">
+                      #{invoice.id.slice(0, 8)}
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-4 truncate">
                   <div className="flex items-center">
-                    <User className="h-5 w-5 text-gray-400" />
-                    <div className="ml-2">
-                      <div className="text-sm text-gray-900">
+                    <User className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    <div className="ml-2 truncate">
+                      <div className="text-sm text-gray-900 truncate">
                         {getContactName(invoice.contactId)}
                       </div>
-                      {invoice.projectId && (
-                        <div className="text-sm text-gray-500">
-                          {getProjectName(invoice.projectId)}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-4 truncate">
                   <div className="flex items-center">
-                    <Calendar className="h-5 w-5 text-gray-400" />
-                    <span className="ml-2 text-sm text-gray-900">
+                    <Calendar className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    <span className="ml-2 text-sm text-gray-900 truncate">
                       {formatDate(invoice.invoiceDate)}
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm font-medium text-gray-900">
+                <td className="px-3 py-4 truncate">
+                  <span className="text-sm font-medium text-gray-900 truncate">
                     {formatAmount(invoice.totalAmount)}
                   </span>
                   {invoice.status !== 'paid' && (
                     <button
                       onClick={() => onSelectInvoice(invoice)}
-                      className="ml-2 text-indigo-600 hover:text-indigo-900"
+                      className="ml-2 text-indigo-600 hover:text-indigo-900 flex-shrink-0"
                       title="Ajouter un paiement"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-4 truncate">
                   <div className="flex items-center">
-                    <Euro className="h-5 w-5 text-gray-400 mr-2" />
-                    <span className={`text-sm font-medium ${
+                    <Euro className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0" />
+                    <span className={`text-sm font-medium truncate ${
                       invoice.status === 'paid' 
                         ? 'text-green-600' 
                         : getRemainingAmount(invoice) < invoice.totalAmount
@@ -168,51 +163,58 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-4">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(invoice.status)}`}>
-                    {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                    {invoice.status === 'draft' ? 'Brouillon' :
+                     invoice.status === 'sent' ? 'Envoyé' :
+                     invoice.status === 'paid' ? 'Payé' :
+                     invoice.status === 'partial_paid' ? 'Partiel' :
+                     invoice.status === 'overdue' ? 'Retard' :
+                     invoice.status === 'cancelled' ? 'Annulé' : invoice.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => {
-                      const contact = contacts.find(c => c.id === invoice.contactId);
-                      const company = companies.find(c => c.id === invoice.companyId);
-                      if (contact && company) {
-                        generateInvoicePdf(
-                          invoice,
-                          contact,
-                          company,
-                          payments.filter(p => p.invoiceId === invoice.id),
-                          invoiceTemplate
-                        );
-                      }
-                    }}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    title="Exporter en PDF"
-                  >
-                    <FileDown className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onEdit(invoice)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    title="Modifier"
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(invoice.id)}
-                    className="text-red-600 hover:text-red-900"
-                    title="Supprimer"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
+                <td className="px-3 py-4 text-sm font-medium">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        const contact = contacts.find(c => c.id === invoice.contactId);
+                        const company = companies.find(c => c.id === invoice.companyId);
+                        if (contact && company) {
+                          generateInvoicePdf(
+                            invoice,
+                            contact,
+                            company,
+                            payments.filter(p => p.invoiceId === invoice.id),
+                            invoiceTemplate
+                          );
+                        }
+                      }}
+                      className="text-indigo-600 hover:text-indigo-900"
+                      title="Exporter en PDF"
+                    >
+                      <FileDown className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => onEdit(invoice)}
+                      className="text-indigo-600 hover:text-indigo-900"
+                      title="Modifier"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(invoice.id)}
+                      className="text-red-600 hover:text-red-900"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
               {/* Payment details */}
               {payments.filter(p => p.invoiceId === invoice.id).length > 0 && (
                 <tr className="bg-gray-50">
-                  <td colSpan={7} className="px-6 py-4">
+                  <td colSpan={7} className="px-3 py-4">
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium text-gray-700">Paiements</h4>
                       {payments
@@ -223,17 +225,17 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
                               <span>{formatDate(payment.paymentDate)}</span>
                               <span>{getPaymentMethodLabel(payment.paymentMethod)}</span>
                               <span className="font-medium">{formatAmount(payment.amountPaid)}</span>
-                              {payment.notes && <span className="text-gray-500">({payment.notes})</span>}
+                              {payment.notes && <span className="text-gray-500 truncate">({payment.notes})</span>}
                             </div>
                             <button
                               onClick={() => onDeletePayment(payment.id)}
-                              className="text-red-600 hover:text-red-800"
+                              className="text-red-600 hover:text-red-800 flex-shrink-0"
                               title="Supprimer le paiement"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
-                      ))}
+                        ))}
                     </div>
                   </td>
                 </tr>
@@ -243,15 +245,15 @@ export function InvoiceList({ invoices, contacts, projects, payments, onSelectIn
         </tbody>
         <tfoot className="bg-gray-50">
           <tr>
-            <td colSpan={3} className="px-6 py-4 text-sm font-medium text-gray-900 text-right">
+            <td colSpan={3} className="px-3 py-4 text-sm font-medium text-gray-900 text-right">
               Total
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="px-3 py-4">
               <span className="text-sm font-medium text-gray-900">
                 {formatAmount(invoices.reduce((sum, invoice) => sum + invoice.totalAmount, 0))}
               </span>
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="px-3 py-4">
               <span className="text-sm font-medium text-gray-900">
                 {formatAmount(invoices.reduce((sum, invoice) => {
                   if (invoice.status === 'paid') return sum;
